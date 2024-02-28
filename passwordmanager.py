@@ -123,26 +123,27 @@ def popupbox(text):
 # Creating the GUI for when a new user
 def initial_screen():
     root.title("Password Manager")
-    canvas = tk.Canvas(root, height=1000, width=1000, bg="grey25")
+    root.resizable(False, False)
+    canvas = tk.Canvas(root, height=500, width=1000, bg="grey25")
     canvas.pack()
     frame = tk.Frame(root, bg="white")
     frame.place(relwidth=0.8, relheight=0.8, relx=0.1, rely=0.1)
 
     tk.Label(root, text="Welcome to the Password Manager!", font=("Helvetica", 32, "bold"), bg="white",
-             foreground="black").place(x=100, y=100)
+             foreground="black").place(x=130, y=50)
 
-    img = tk.PhotoImage(file=PNG_DIR)
-    tk.Label(root, image=img, border=0).place(x=150, y=150)
+    # img = tk.PhotoImage(file=PNG_DIR)
+    # tk.Label(root, image=img, border=0).place(x=150, y=80)
 
     tk.Label(root,
              text="Please enter a master password.\nPassword Requirements:\nPasswords must:\n- Be 10 characters in length\nPasswords must contain:\n-"
                   " an uppercase character\n- a lowercase character\n- a number\n- a symbol\n",
-             font=("Arial", 8), bg="#f2f2f2", foreground="Black", justify="left").place(x=242, y=90)
+             font=("Arial", 14), bg="white", foreground="Black", justify="left").place(x=630, y=120)
 
-    tk.Label(root, text="Create a Master Password", font=("Arial", 14, "bold"), bg="white", foreground="Blue").place(
-        x=155, y=225)
-    txt = tk.Entry(border=2, show="*")
-    txt.place(x=155, y=250)
+    tk.Label(root, text="Create a Master Password", font=("Arial", 18, "bold"), bg="white", foreground="Blue").place(
+        x=155, y=120)
+    txt = tk.Entry(border=2, show="*", width=50)
+    txt.place(x=155, y=150)
     txt.focus()
 
     def show_password():
@@ -152,12 +153,12 @@ def initial_screen():
             txt.config(show="*")
 
     tk.Checkbutton(root, text="Show Password", command=show_password, bg="white", foreground="black").place(x=155,
-                                                                                                            y=280)
+                                                                                                            y=180)
 
-    tk.Label(root, text="Re-type your Password", font=("Arial", 14, "bold"), bg="white", foreground="Blue").place(x=155,
-                                                                                                                  y=306)
-    txt2 = tk.Entry(border=2, show="*")
-    txt2.place(x=155, y=335)
+    tk.Label(root, text="Re-type your Password", font=("Arial", 18, "bold"), bg="white", foreground="Blue").place(x=155,
+                                                                                                                  y=210)
+    txt2 = tk.Entry(border=2, show="*", width=50)
+    txt2.place(x=155, y=245)
 
     def show_password():
         if (txt2.cget("show") == "*"):
@@ -166,9 +167,9 @@ def initial_screen():
             txt2.config(show="*")
 
     tk.Checkbutton(root, text="Show Password", command=show_password, bg="white", foreground="black").place(x=155,
-                                                                                                            y=359)
+                                                                                                            y=275)
     tk.Button(root, text="Close", font=("Bahnschrift 20", 14, "bold"), bg="white", foreground="black", borderwidth=2,
-              command=quit).place(x=360, y=410)
+              command=quit).place(x=380, y=390)
 
     def save_passwords():
         if txt.get() != txt2.get():
@@ -187,7 +188,7 @@ def initial_screen():
             password_manager()
 
     tk.Button(root, text="Submit", font=("Bahnschrift 20", 14, "bold"), bg="white", foreground="black", borderwidth=2,
-              command=save_passwords).place(x=205, y=385)
+              command=save_passwords).place(x=205, y=390)
     root.mainloop()
 
 
