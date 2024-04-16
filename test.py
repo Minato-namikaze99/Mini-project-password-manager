@@ -1,22 +1,35 @@
-import random 
+import random
 import math
- 
-def is_prime(n): #checks whether a number is prime or not
-    if n<2:
+
+def is_prime(n, k=5):
+    """Rabin-Miller primality test."""
+    if n <= 1:
         return False
-    
-    for i in range(2, n//2 +1):
-        if n%i==0:
+    if n <= 3:
+        return True
+    if n % 2 == 0:
+        return False
+
+    # Write n - 1 as (2^s) * d
+    s = 0
+    d = n - 1
+    while d % 2 == 0:
+        d //= 2
+        s += 1
+
+    # Witness loop
+    for _ in range(k):
+        a = random.randint(2, n - 1)
+        x = pow(a, d, n)
+        if x == 1 or x == n - 1:
+            continue
+        for _ in range(s - 1):
+            x = pow(x, 2, n)
+            if x == n - 1:
+                break
+        else:
             return False
-        
-    return True 
-
-def generate_prime(min_value, max_value): #generates prime number between a range
-    prime=random.randint(min_value, max_value)
-    while not is_prime(prime): #if the number generated is not prime, redo it again
-        prime=random.randint(min_value, max_value)
-
-    return prime
+    return True
 
 def mod_inverse(e, phi): #finds the mod inverse 
     for d in range(3, phi):
@@ -24,11 +37,18 @@ def mod_inverse(e, phi): #finds the mod inverse
             return d 
     
     raise ValueError("Mod_Inverse does not exist")
-min_value = 10000
-max_value = 50000
-p,q = generate_prime(min_value, max_value), generate_prime(min_value, max_value) 
-#generates 2 prime numbers P and Q
 
+def generate_prime(min_value, max_value):
+    """Generate a prime number using Rabin-Miller test."""
+    while True:
+        prime = random.randint(min_value, max_value)
+        if is_prime(prime):
+            return prime
+
+# Example usage:
+min_value = 1000
+max_value = 5000
+p,q = generate_prime(min_value, max_value), generate_prime(min_value, max_value) 
 while p==q: #if both the prime numbers generated are same, then generate again
     q = generate_prime(1000, 5000)
 
@@ -67,4 +87,3 @@ message_enc = [pow(ch, d, n) for ch in cipher] #this is the decrypted string, i.
 decr = "".join(chr(ch) for ch in message_enc) #this is the actual message after being converted from ASCII
 
 print("\n\n\n\nDecrypted Message: ", decr)
-

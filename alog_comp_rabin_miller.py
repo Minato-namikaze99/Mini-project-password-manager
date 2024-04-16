@@ -9,15 +9,35 @@ key_operations = {
     'Total Key Operations': []
 }
 
-def is_prime(n): 
-    if n < 2:
+def is_prime(n, k=5):
+    """Rabin-Miller primality test."""
+    if n <= 1:
         return False
-    
-    for i in range(2, n//2 + 1):
-        if n % i == 0:
+    if n <= 3:
+        return True
+    if n % 2 == 0:
+        return False
+
+    # Write n - 1 as (2^s) * d
+    s = 0
+    d = n - 1
+    while d % 2 == 0:
+        d //= 2
+        s += 1
+
+    # Witness loop
+    for _ in range(k):
+        a = random.randint(2, n - 1)
+        x = pow(a, d, n)
+        if x == 1 or x == n - 1:
+            continue
+        for _ in range(s - 1):
+            x = pow(x, 2, n)
+            if x == n - 1:
+                break
+        else:
             return False
-        
-    return True 
+    return True
 
 def generate_prime(min_value, max_value): 
     prime_generation_count = 0
@@ -84,7 +104,7 @@ plt.ylabel('Total Key Operations')
 plt.grid(True)
 
 # Save the plot as an image
-plt.savefig('rsa_key_operations_plot.png')
+plt.savefig('rsa_key_operations_plot_new.png')
 
 # Show the plot
 plt.show()
