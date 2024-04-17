@@ -11,6 +11,7 @@ key_operations = {
 
 def is_prime(n, k=5):
     """Rabin-Miller primality test."""
+    count=0
     if n <= 1:
         return False
     if n <= 3:
@@ -27,25 +28,28 @@ def is_prime(n, k=5):
 
     # Witness loop
     for _ in range(k):
+	count +=1
         a = random.randint(2, n - 1)
-        x = pow(a, d, n)
+        x = (a**d)%n
         if x == 1 or x == n - 1:
             continue
         for _ in range(s - 1):
-            x = pow(x, 2, n)
+	    count +=1
+            x = (x**2)%n
             if x == n - 1:
                 break
         else:
             return False
-    return True
+    return True, count
 
 def generate_prime(min_value, max_value): 
     prime_generation_count = 0
     while True:
         prime_generation_count += 1
         prime = random.randint(min_value, max_value)
-        if is_prime(prime):
-            return prime, prime_generation_count
+	pp, count = is_prime(prime)
+        if pp:
+            return prime, prime_generation_count+count
 
 def mod_inverse(e, phi):
     mod_inverse_count = 0
@@ -83,7 +87,7 @@ def run_rsa(min_value, max_value):
     key_operations['Key Size'].append(math.ceil(math.log2(max(p, q))))
     key_operations['Total Key Operations'].append(total_key_operations)
 
-l1 = [[0,9],[10,99],[100,999],[1000, 9999]]
+l1 = [[0,9],[10,99],[100,999],[1000, 9999],[10000, 99999],[100000, 999999]]
 c99 = 0
 for i in l1:
     run_rsa(i[0], i[1])
