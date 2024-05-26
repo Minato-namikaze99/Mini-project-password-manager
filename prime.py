@@ -18,14 +18,12 @@ def nBitRandom(n):
  
  
 def getLowLevelPrime(n):
-    '''Generate a prime candidate divisible 
-    by first primes'''
+    # Generate a prime candidate divisible by first primes
     while True:
         # Obtain a random number
         pc = nBitRandom(n)
  
-        # Test divisibility by pre-generated
-        # primes
+        # Test divisibility by pre-generated primes
         for divisor in first_primes_list:
             if pc % divisor == 0 and divisor**2 <= pc:
                 break
@@ -34,7 +32,7 @@ def getLowLevelPrime(n):
  
  
 def isMillerRabinPassed(mrc):
-    '''Run 20 iterations of Rabin Miller Primality test'''
+    # Run 20 iterations of Rabin Miller Primality test
     maxDivisionsByTwo = 0
     ec = mrc-1
     while ec % 2 == 0:
@@ -59,12 +57,11 @@ def isMillerRabinPassed(mrc):
     return True
  
  
-if __name__ == '__main__':
+def gen_prime():
     while True:
-        n = 1024
+        n = 100
         prime_candidate = getLowLevelPrime(n)
         if not isMillerRabinPassed(prime_candidate):
             continue
         else:
-            print(n, "bit prime is: \n", prime_candidate)
-            break
+            return(prime_candidate)

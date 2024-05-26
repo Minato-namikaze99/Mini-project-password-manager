@@ -23,6 +23,17 @@ password TEXT NOT NULL);
 """)
 
 cursor.execute("""
+CREATE TABLE IF NOT EXISTS usbdetails(
+id INTEGER  PRIMARY KEY,
+name TEXT NOT NULL);
+""")
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS publickey(
+id TEXT PRIMARY KEY);
+""")
+
+cursor.execute("""
 CREATE TABLE IF NOT EXISTS passwordmanager(
 id INTEGER  PRIMARY KEY,
 website TEXT NOT NULL,
@@ -132,15 +143,18 @@ def initial_screen():
     tk.Label(root, text="Welcome to the Password Manager!", font=("Helvetica", 32, "bold"), bg="white",
              foreground="black").place(x=130, y=50)
 
-    # img = tk.PhotoImage(file=PNG_DIR)
-    # tk.Label(root, image=img, border=0).place(x=150, y=80)
+
+    # tk.Label(root,
+    #          text="Please enter the name.\nPassword Requirements:\nPasswords must:\n- Be 10 characters in length\nPasswords must contain:\n-"
+    #               " an uppercase character\n- a lowercase character\n- a number\n- a symbol\n",
+    #          font=("Arial", 14), bg="white", foreground="Black", justify="left").place(x=630, y=120)
 
     tk.Label(root,
-             text="Please enter a master password.\nPassword Requirements:\nPasswords must:\n- Be 10 characters in length\nPasswords must contain:\n-"
-                  " an uppercase character\n- a lowercase character\n- a number\n- a symbol\n",
+             text="Please plug in the USB.\nIf not plugged in,\n1. Please close the Program \n2. Plug in the USB \n3. Relaunch the program",
              font=("Arial", 14), bg="white", foreground="Black", justify="left").place(x=630, y=120)
 
-    tk.Label(root, text="Create a Master Password", font=("Arial", 18, "bold"), bg="white", foreground="Blue").place(
+
+    tk.Label(root, text="Enter the name of the USB", font=("Arial", 18, "bold"), bg="white", foreground="Blue").place(
         x=155, y=120)
     txt = tk.Entry(border=2, show="*", width=50)
     txt.place(x=155, y=150)
@@ -155,7 +169,7 @@ def initial_screen():
     tk.Checkbutton(root, text="Show Password", command=show_password, bg="white", foreground="black").place(x=155,
                                                                                                             y=180)
 
-    tk.Label(root, text="Re-type your Password", font=("Arial", 18, "bold"), bg="white", foreground="Blue").place(x=155,
+    tk.Label(root, text="Re-Enter the name of the USB", font=("Arial", 18, "bold"), bg="white", foreground="Blue").place(x=155,
                                                                                                                   y=210)
     txt2 = tk.Entry(border=2, show="*", width=50)
     txt2.place(x=155, y=245)
@@ -171,24 +185,26 @@ def initial_screen():
     tk.Button(root, text="Close", font=("Bahnschrift 20", 14, "bold"), bg="white", foreground="black", borderwidth=2,
               command=quit).place(x=380, y=390)
 
-    def save_passwords():
+    def save_usb_details():
         if txt.get() != txt2.get():
-            tk.Label(root, text="Passwords Don't Match", font=("Arial", 10, "bold"), bg="white",
+            tk.Label(root, text="Entered names do not match!", font=("Arial", 10, "bold"), bg="white",
                      foreground="Red").place(x=170, y=450)
-        elif isStrong(txt.get())[0] == False:
-            tk.Label(root, text="Password is weak.\n Requirements not met.", font=("Arial", 10, "bold"), bg="white",
-                     foreground="Red").place(x=170, y=450)
+            
+        # elif isStrong(txt.get())[0] == False:
+        #     tk.Label(root, text="Password is weak.\n Requirements not met.", font=("Arial", 10, "bold"), bg="white",
+        #              foreground="Red").place(x=170, y=450)
 
         else:
             hashed = hashing(txt.get().encode("utf-8"))
-            insert_pass = """INSERT INTO masterpassword(password)
+            insert_pass = """INSERT INTO usbdetails(name)
             VALUES(?) """
             cursor.execute(insert_pass, [(hashed)])
             db.commit()
+#################################################################################################################### call a function to generate the key and then store the public key in the DB and the private one in the pendrive
             password_manager()
 
     tk.Button(root, text="Submit", font=("Bahnschrift 20", 14, "bold"), bg="white", foreground="black", borderwidth=2,
-              command=save_passwords).place(x=205, y=390)
+              command=save_usb_details).place(x=205, y=390)
     root.mainloop()
 
 
@@ -328,7 +344,7 @@ def password_manager():
         print("Keep Calm and Store Passwords")
 
 
-cursor.execute("SELECT * FROM masterpassword")
+cursor.execute("SELECT * FROM usbdetails")
 if cursor.fetchall():
     login_screen()
 else:
