@@ -24,7 +24,7 @@ def get_security_key(drive_mount_point):
         return None
 
 def store_security_key(drive_mount_point, security_key):
-    key_file_path = os.path.join(drive_mount_point, 'security_key.txt')
+    key_file_path = os.path.join(drive_mount_point, 'security_key.key')
     with open(key_file_path, 'w') as key_file:
         key_file.write(security_key)
 

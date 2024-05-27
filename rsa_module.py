@@ -31,8 +31,8 @@ def keygen():
         e += 1
 
     d = find_d(e, phi_n)
-    
-    return (e, n), d
+    l = [e,n,d]
+    return l
 
 def encrypt(public_key, plaintext):
     e, n = public_key

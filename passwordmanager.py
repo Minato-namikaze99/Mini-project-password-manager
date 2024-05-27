@@ -7,11 +7,12 @@ import sqlite3
 import hashlib
 from tkinter import simpledialog
 from functools import partial
+import rsa_module
+import usb_test
 
 # Constants to specify necessary directories
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_DIR = os.path.join(ROOT_DIR, 'password_manager.db')
-PNG_DIR = os.path.join(ROOT_DIR, '5850971-1.png')
 
 # Creating the Database for the Passwords
 with sqlite3.connect("password_manager.db") as db:
@@ -30,7 +31,8 @@ name TEXT NOT NULL);
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS publickey(
-id TEXT PRIMARY KEY);
+id1 TEXT PRIMARY KEY,
+id2 TEXT NOT NULL);
 """)
 
 cursor.execute("""
@@ -195,13 +197,49 @@ def initial_screen():
         #              foreground="Red").place(x=170, y=450)
 
         else:
-            hashed = hashing(txt.get().encode("utf-8"))
-            insert_pass = """INSERT INTO usbdetails(name)
-            VALUES(?) """
-            cursor.execute(insert_pass, [(hashed)])
-            db.commit()
-#################################################################################################################### call a function to generate the key and then store the public key in the DB and the private one in the pendrive
-            password_manager()
+            usb_name = txt.get()
+
+            if usb_test.find_usb_drive(usb_name):
+                hashed = hashing(usb_name.encode("utf-8"))
+                insert_pass = """INSERT INTO usbdetails(name)
+                VALUES(?) """
+                cursor.execute(insert_pass, [(hashed)])
+                db.commit()
+                keys = rsa_module.keygen()
+                e = str(keys[0])
+                n = str(keys[1])
+                d = str(keys[2])
+                insert_key = """INSERT INTO publickey(id1, id2)
+                VALUES(?, ?) """
+                cursor.execute(insert_key, [e,n])
+                db.commit()
+
+                usb_test.store_security_key(usb_test.find_usb_drive(usb_name), d)
+
+                popup = tk.Toplevel(root)
+                popup.title("Password Manager Profile Created!")
+
+                # Creating a label in the popup window
+                label = tk.Label(popup, text="The USB and the keys were generated successfully!\nTo use the app, relaunch the app with the USB Drive plugged in", font=("Arial", 20, "bold"), foreground="Blue")
+                label.pack(pady=10, padx = 10)
+
+                def close_app():
+                    popup.destroy()
+                    root.destroy()
+
+                # Create a button in the popup window to close the application
+                close_button = tk.Button(popup, text="Close", command=close_app)
+                close_button.pack(pady=5)
+
+                # Ensure the popup window appears in the center of the screen
+                popup.geometry("900x150")
+                popup.transient(root)
+                popup.grab_set()
+                root.wait_window(popup)
+
+            else:
+                tk.Label(root, text="The USB drive is not plugged in, please plug in and retry!", font=("Arial", 10, "bold"), bg="white",
+                     foreground="Red").place(x=170, y=450)
 
     tk.Button(root, text="Submit", font=("Bahnschrift 20", 14, "bold"), bg="white", foreground="black", borderwidth=2,
               command=save_usb_details).place(x=205, y=390)
@@ -218,9 +256,6 @@ def login_screen():
 
     tk.Label(root, text="Welcome to the Password Manager!", font=("Arial", 12, "bold"), bg="white",
              foreground="black").place(x=70, y=50)
-
-    img = tk.PhotoImage(file=PNG_DIR)
-    tk.Label(root, image=img, border=0).place(x=130, y=80)
 
     tk.Label(root, text="Enter Master Password", font=("Arial", 12, "bold"), bg="white", foreground="Red").place(x=120,
                                                                                                                  y=225)
