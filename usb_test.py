@@ -16,7 +16,7 @@ def find_usb_drive(drive_name):
     return None
 
 def get_security_key(drive_mount_point):
-    key_file_path = os.path.join(drive_mount_point, 'security_key.txt')
+    key_file_path = os.path.join(drive_mount_point, 'security_key.key')
     if os.path.exists(key_file_path):
         with open(key_file_path, 'r') as key_file:
             return key_file.read().strip()

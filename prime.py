@@ -59,7 +59,7 @@ def isMillerRabinPassed(mrc):
  
 def gen_prime():
     while True:
-        n = 100
+        n = 1024
         prime_candidate = getLowLevelPrime(n)
         if not isMillerRabinPassed(prime_candidate):
             continue

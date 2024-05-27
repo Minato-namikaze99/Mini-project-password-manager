@@ -1,4 +1,5 @@
 import os
+import ast
 import random
 import string
 from random import randint
@@ -17,11 +18,6 @@ DB_DIR = os.path.join(ROOT_DIR, 'password_manager.db')
 # Creating the Database for the Passwords
 with sqlite3.connect("password_manager.db") as db:
     cursor = db.cursor()
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS masterpassword(
-id INTEGER  PRIMARY KEY,
-password TEXT NOT NULL);
-""")
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS usbdetails(
@@ -43,11 +39,6 @@ username TEXT NOT NULL,
 password TEXT NOT NULL);
 """)
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS userpasswords(
-id INTEGER  PRIMARY KEY,
-passwords TEXT NOT NULL);
-""")
 
 
 # Intermediate functions
@@ -200,10 +191,9 @@ def initial_screen():
             usb_name = txt.get()
 
             if usb_test.find_usb_drive(usb_name):
-                hashed = hashing(usb_name.encode("utf-8"))
                 insert_pass = """INSERT INTO usbdetails(name)
                 VALUES(?) """
-                cursor.execute(insert_pass, [(hashed)])
+                cursor.execute(insert_pass, [(usb_name)])
                 db.commit()
                 keys = rsa_module.keygen()
                 e = str(keys[0])
@@ -249,55 +239,83 @@ def initial_screen():
 # Creating the GUI of the login screen
 def login_screen():
     root.title("Password Manager")
-    canvas = tk.Canvas(root, height=400, width=400, bg="#263D42")
+    root.resizable(False, False)
+    canvas = tk.Canvas(root, height=250, width=1000, bg="grey25")
     canvas.pack()
     frame = tk.Frame(root, bg="white")
     frame.place(relwidth=0.8, relheight=0.8, relx=0.1, rely=0.1)
 
-    tk.Label(root, text="Welcome to the Password Manager!", font=("Arial", 12, "bold"), bg="white",
-             foreground="black").place(x=70, y=50)
+    tk.Label(root, text="Welcome to the Password Manager!", font=("Arial", 28, "bold"), bg="white",
+             foreground="black").place(x=180, y=50)
 
-    tk.Label(root, text="Enter Master Password", font=("Arial", 12, "bold"), bg="white", foreground="Red").place(x=120,
-                                                                                                                 y=225)
-
-    e3 = tk.Entry(border=2, show="*")
-    e3.place(x=106, y=250)
-
-    def show_password():
-        if (e3.cget("show") == "*"):
-            e3.config(show="")
-        else:
-            e3.config(show="*")
-
-    tk.Checkbutton(root, text="Show Password", command=show_password, bg="white", foreground="black").place(x=104,
-                                                                                                            y=275)
-
-    def get_Master_Password():
-        check_Hashed = hashing(e3.get().encode("utf-8"))
-        cursor.execute("SELECT * FROM masterpassword WHERE id = 1 AND password = ?", [(check_Hashed)])
-        return cursor.fetchall()
+    tk.Label(root, text="Please make sure to plug in the USB with the key and press the 'Unlock' Button", font=("Arial", 12, "bold"), bg="white", foreground="Red").place(x=190,y=100)
 
     def password_check():
         try:
-            password = get_Master_Password()
-            checking_pass = password[0]
-            check = checking_pass[1]
-            if hashing(e3.get().encode("utf-8")) == check:
-                password_manager()
+            cursor.execute("SELECT * FROM usbdetails")
+            det = cursor.fetchall()
+            usb_name = det[0][1]
+            # print(usb_name)
+
+            if usb_test.find_usb_drive(usb_name):
+                priv = usb_test.get_security_key(usb_test.find_usb_drive(usb_name))
+                if priv:
+                    password_manager(priv)
+
+                else:
+                    popup = tk.Toplevel(root)
+                    popup.title("Error!")
+
+                    # Creating a label in the popup window
+                    label = tk.Label(popup, text="The key stored in the USB is Empty!\nFor security reasons, please create a new profile!", font=("Arial", 20, "bold"), foreground="Blue")
+                    label.pack(pady=10, padx = 10)
+
+                    def close_app():
+                        popup.destroy()
+                        root.destroy()
+
+                    # Create a button in the popup window to close the application
+                    close_button = tk.Button(popup, text="Close", command=close_app)
+                    close_button.pack(pady=5)
+
+                    # Ensure the popup window appears in the center of the screen
+                    popup.geometry("900x150")
+                    popup.transient(root)
+                    popup.grab_set()
+                    root.wait_window(popup)
+            
+            else:
+                popup = tk.Toplevel(root)
+                popup.title("No USB Drive Found!")
+
+                # Creating a label in the popup window
+                label = tk.Label(popup, text="The Application could not find the USB Drive.\nPlease plug in the correct USB drive\n or Please try unplugging and Plugging it back again ", font=("Arial", 20, "bold"), foreground="Blue")
+                label.pack(pady=10, padx = 10)
+
+                def close_app():
+                    popup.destroy()
+
+                # Create a button in the popup window to close the application
+                close_button = tk.Button(popup, text="Retry", command=close_app)
+                close_button.pack(pady=5)
+
+                # Ensure the popup window appears in the center of the screen
+                popup.geometry("900x150")
+                popup.transient(root)
+                popup.grab_set()
+                root.wait_window(popup)
         except:
-            tk.Label(root, text="Wrong Password", font=("Arial", 14, "bold"), bg="white", foreground="red").place(x=140,
+            tk.Label(root, text="Some Error Occurred", font=("Arial", 14, "bold"), bg="white", foreground="red").place(x=140,
                                                                                                                   y=340)
 
-    tk.Button(root, text="Submit", font=("Bahnschrift 20", 14, "bold"), bg="white", foreground="black",
-              command=password_check).place(x=160, y=305)
-    tk.Button(root, text="Close", font=("Bahnschrift 20", 14, "bold"), bg="white", foreground="black", borderwidth=2,
-              command=quit).place(x=280, y=330)
+    tk.Button(root, text="Unlock", font=("Bahnschrift 20", 14, "bold"), bg="white", foreground="black",  borderwidth=2, command=password_check).place(x=350, y=150)
+    tk.Button(root, text="Close", font=("Bahnschrift 20", 14, "bold"), bg="white", foreground="black", borderwidth=2, command=quit).place(x=450, y=150)
 
     root.mainloop()
 
 
 # This lets the USER inside the Password Manager actually
-def password_manager():
+def password_manager(priv):
     for widget in root.winfo_children():
         widget.destroy()
     root.title("Password Manager")
@@ -309,24 +327,29 @@ def password_manager():
 
         website = popupbox(text1)
         username = popupbox(text2)
-        password = random_pass()
+        password = popupbox(text3)
 
-        hashed_pass = hashing(password.encode("utf-8"))
+        enc_pass = str(rsa_module.encrypt((e,n), password))
+        print(enc_pass)
 
         insert_fields = """INSERT INTO passwordmanager(website,username,password)
         VALUES(?, ?, ?)"""
 
-        insert_password = """INSERT INTO userpasswords(passwords)
-        VALUES(?)"""
-
-        cursor.execute(insert_fields, (website, username, password))
-
-        cursor.execute(insert_password, [(hashed_pass)])
+        cursor.execute(insert_fields, (website, username, enc_pass))
 
         db.commit()
-        password_manager()
+        password_manager(priv)
 
     root.geometry("1100x340")
+    priv = int(priv)
+    cursor.execute("select * from publickey")
+    det = cursor.fetchall()
+    e = int(det[0][0])
+    n = int(det[0][1])
+
+    # print("Private:", priv)
+    # print("e:", e)
+    # print("n:", n)
 
     lb = tk.Label(root, text="Welcome to the Password Manager!!", font=("Arial", 18, "bold"), foreground="RED")
     lb.grid(column=1, padx=150)
@@ -336,18 +359,8 @@ def password_manager():
     def remove_entry(input):
         cursor.execute("DELETE FROM passwordmanager where id = ?", (input,))
         db.commit()
-        password_manager()
+        password_manager(priv)
 
-    def new_user():
-        path = DB_DIR
-        try:
-            os.remove(path)
-            print("Now Close the Window and Restart the Program")
-        except FileNotFoundError:
-            print("No such file found")
-
-    # tk.Button(root, text="Switch User?", font=("Bahnschrift 20",14,"bold"), bg="white",foreground="black",command=new_user).place(x=590,y=410)
-    # tk.Button(root, text="Close",font=("Bahnschrift 20", 14,"bold"), bg="white",foreground="black",borderwidth=2,command=quit).place(x=500,y=410)
 
     lbl = tk.Label(root, text="WEBSITE", font=("Arial", 13, "bold"), foreground="black")
     lbl.grid(row=3, column=0)
@@ -363,12 +376,22 @@ def password_manager():
             while True:
                 cursor.execute("SELECT * FROM passwordmanager")
                 array = cursor.fetchall()
+
                 lbl1 = tk.Label(root, text=(array[i][1]), font=("Arial", 13,), foreground="black")
                 lbl1.grid(column=0, row=i + 4)
+                print(array[i][1])
+
                 lbl1 = tk.Label(root, text=(array[i][2]), font=("Arial", 13,), foreground="black")
                 lbl1.grid(column=1, row=i + 4)
-                lbl1 = tk.Label(root, text=(array[i][3]), font=("Arial", 13,), foreground="black")
+                print(array[i][2])
+                print(array[i][3])
+                data = ast.literal_eval(array[i][3])
+                print(data)
+                dec_data = rsa_module.decrypt(priv, (e,n), data)
+                print(dec_data)
+                lbl1 = tk.Label(root, text=(dec_data), font=("Arial", 13,), foreground="black")
                 lbl1.grid(column=2, row=i + 4)
+
                 button = tk.Button(root, text="delete", command=partial(remove_entry, array[i][0]))
                 button.grid(column=3, row=i + 4)
                 i = i + 1
