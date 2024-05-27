@@ -392,7 +392,7 @@ def password_manager(priv):
                 lbl1 = tk.Label(root, text=(dec_data), font=("Arial", 13,), foreground="black")
                 lbl1.grid(column=2, row=i + 4)
 
-                button = tk.Button(root, text="delete", command=partial(remove_entry, array[i][0]))
+                button = tk.Button(root, text="Delete", command=partial(remove_entry, array[i][0]))
                 button.grid(column=3, row=i + 4)
                 i = i + 1
                 cursor.execute("SELECT * FROM passwordmanager")
