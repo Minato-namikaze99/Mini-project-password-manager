@@ -5,7 +5,6 @@ import string
 from random import randint
 import tkinter as tk
 import sqlite3
-import hashlib
 from tkinter import simpledialog
 from functools import partial
 import rsa_module
@@ -105,12 +104,6 @@ def isStrong(password):
             return_code[0] = 0
 
     return return_code
-
-
-def hashing(x):
-    hash = hashlib.sha256(x)
-    hash = hash.hexdigest()
-    return hash
 
 
 # Main GUI
@@ -218,11 +211,11 @@ def initial_screen():
                     root.destroy()
 
                 # Create a button in the popup window to close the application
-                close_button = tk.Button(popup, text="Close", command=close_app)
-                close_button.pack(pady=5)
+                close_button = tk.Button(popup, text="Close", font=("Bahnschrift 20", 14, "bold"), command=close_app)
+                close_button.pack(pady=10)
 
                 # Ensure the popup window appears in the center of the screen
-                popup.geometry("900x150")
+                popup.geometry("900x180")
                 popup.transient(root)
                 popup.grab_set()
                 root.wait_window(popup)
@@ -276,10 +269,10 @@ def login_screen():
 
                     # Create a button in the popup window to close the application
                     close_button = tk.Button(popup, text="Close", command=close_app)
-                    close_button.pack(pady=5)
+                    close_button.pack(pady=10)
 
                     # Ensure the popup window appears in the center of the screen
-                    popup.geometry("900x150")
+                    popup.geometry("900x180")
                     popup.transient(root)
                     popup.grab_set()
                     root.wait_window(popup)
@@ -292,15 +285,15 @@ def login_screen():
                 label = tk.Label(popup, text="The Application could not find the USB Drive.\nPlease plug in the correct USB drive\n or Please try unplugging and Plugging it back again ", font=("Arial", 20, "bold"), foreground="Blue")
                 label.pack(pady=10, padx = 10)
 
-                def close_app():
+                def close_win():
                     popup.destroy()
 
                 # Create a button in the popup window to close the application
-                close_button = tk.Button(popup, text="Retry", command=close_app)
-                close_button.pack(pady=5)
+                close_button = tk.Button(popup, text="Retry", font=("Bahnschrift 20", 14, "bold"), command=close_win)
+                close_button.pack(pady=10)
 
                 # Ensure the popup window appears in the center of the screen
-                popup.geometry("900x150")
+                popup.geometry("900x180")
                 popup.transient(root)
                 popup.grab_set()
                 root.wait_window(popup)
@@ -309,7 +302,7 @@ def login_screen():
                                                                                                                   y=340)
 
     tk.Button(root, text="Unlock", font=("Bahnschrift 20", 14, "bold"), bg="white", foreground="black",  borderwidth=2, command=password_check).place(x=350, y=150)
-    tk.Button(root, text="Close", font=("Bahnschrift 20", 14, "bold"), bg="white", foreground="black", borderwidth=2, command=quit).place(x=450, y=150)
+    tk.Button(root, text="Close", font=("Bahnschrift 20", 14, "bold"), bg="white", foreground="black", borderwidth=2, command=quit).place(x=500, y=150)
 
     root.mainloop()
 
