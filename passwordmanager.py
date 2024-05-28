@@ -159,7 +159,7 @@ def initial_screen():
         else:
             txt.config(show="*")
 
-    tk.Checkbutton(root, text="Show Password", command=show_password, bg="white", foreground="black").place(x=155,
+    tk.Checkbutton(root, text="Show Text", command=show_password, bg="white", foreground="black").place(x=155,
                                                                                                             y=180)
 
     tk.Label(root, text="Re-Enter the name of the USB", font=("Arial", 18, "bold"), bg="white", foreground="Blue").place(x=155,
@@ -173,7 +173,7 @@ def initial_screen():
         else:
             txt2.config(show="*")
 
-    tk.Checkbutton(root, text="Show Password", command=show_password, bg="white", foreground="black").place(x=155,
+    tk.Checkbutton(root, text="Show Text", command=show_password, bg="white", foreground="black").place(x=155,
                                                                                                             y=275)
     tk.Button(root, text="Close", font=("Bahnschrift 20", 14, "bold"), bg="white", foreground="black", borderwidth=2,
               command=quit).place(x=380, y=390)
